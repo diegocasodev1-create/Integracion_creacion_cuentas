@@ -24,6 +24,7 @@ afterEach(() => {
 beforeEach(async () => {
   const { keys } = await env.RESELLER_KV.list();
   await Promise.all(keys.map((k) => env.RESELLER_KV.delete(k.name)));
+  await env.RESELLER_KV.put("whitelist:juan.perez@agencia.com", "true");
   await saveResellerLink(env.RESELLER_KV, {
     resellerEmail: "juan.perez@agencia.com",
     locationId: "loc_abc123",
@@ -89,5 +90,28 @@ describe("handleCreateUser", () => {
 
     expect(response.status).toBe(502);
     expect((await response.json()).error.message).toBe("password no cumple la política de GHL");
+  });
+
+  it("responde 403 sin llamar a GHL si resellerEmail tiene formato válido pero no está en la whitelist (antes de chequear ownership)", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await handleCreateUser(
+      postRequest({ ...validBody, resellerEmail: "no.autorizado@agencia.com" }),
+      env
+    );
+
+    expect(response.status).toBe(403);
+    expect((await response.json()).error.message).toBe("Este correo no está autorizado");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("responde 502 si GHL devuelve 201 sin id de usuario", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({}), { status: 201 })));
+
+    const response = await handleCreateUser(postRequest(validBody), env);
+
+    expect(response.status).toBe(502);
+    expect((await response.json()).error.code).toBe("GHL_ERROR");
   });
 });

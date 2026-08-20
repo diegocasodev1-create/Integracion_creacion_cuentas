@@ -28,6 +28,7 @@ describe("routeRequest", () => {
   });
 
   it("responde 500 con forma de error si un handler lanza una excepción no controlada", async () => {
+    await env.RESELLER_KV.put("whitelist:juan.perez@agencia.com", "true");
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
 
     const response = await routeRequest(

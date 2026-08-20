@@ -3,6 +3,7 @@ import { validateCreateUserPayload } from "../validation.js";
 import { getResellerLink } from "../kv/resellerLinks.js";
 import { createUser } from "../ghl/users.js";
 import { GhlApiError } from "../ghl/client.js";
+import { isResellerWhitelisted } from "../kv/whitelist.js";
 
 export async function handleCreateUser(request, env) {
   let body;
@@ -15,6 +16,11 @@ export async function handleCreateUser(request, env) {
   const errors = validateCreateUserPayload(body);
   if (errors.length > 0) {
     return errorResponse(400, "VALIDATION_ERROR", errors.join("; "));
+  }
+
+  const authorized = await isResellerWhitelisted(env.RESELLER_KV, body.resellerEmail);
+  if (!authorized) {
+    return errorResponse(403, "FORBIDDEN", "Este correo no está autorizado");
   }
 
   const link = await getResellerLink(env.RESELLER_KV, body.resellerEmail, body.locationId);
@@ -37,6 +43,10 @@ export async function handleCreateUser(request, env) {
       return errorResponse(502, "GHL_ERROR", err.message);
     }
     throw err;
+  }
+
+  if (!user?.id) {
+    return errorResponse(502, "GHL_ERROR", "GHL no devolvió un id de usuario válido");
   }
 
   return jsonResponse({ userId: user.id, locationId: body.locationId }, { status: 201 });

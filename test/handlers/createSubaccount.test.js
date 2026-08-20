@@ -31,6 +31,7 @@ afterEach(() => {
 beforeEach(async () => {
   const { keys } = await env.RESELLER_KV.list();
   await Promise.all(keys.map((k) => env.RESELLER_KV.delete(k.name)));
+  await env.RESELLER_KV.put("whitelist:juan.perez@agencia.com", "true");
 });
 
 describe("handleCreateSubaccount", () => {
@@ -109,5 +110,45 @@ describe("handleCreateSubaccount", () => {
 
     expect(response.status).toBe(502);
     expect((await response.json()).error).toEqual({ code: "GHL_ERROR", message: "companyId inválido" });
+  });
+
+  it("responde 403 sin llamar a GHL si resellerEmail tiene formato válido pero no está en la whitelist", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await handleCreateSubaccount(
+      postRequest({ ...validBody, resellerEmail: "no.autorizado@agencia.com" }),
+      env
+    );
+
+    expect(response.status).toBe(403);
+    expect((await response.json()).error.code).toBe("FORBIDDEN");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("responde 502 si GHL devuelve 200 sin id de subcuenta", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({}), { status: 200 })));
+
+    const response = await handleCreateSubaccount(postRequest(validBody), env);
+
+    expect(response.status).toBe(502);
+    expect((await response.json()).error.code).toBe("GHL_ERROR");
+  });
+
+  it("responde 502 mencionando el id de la subcuenta si falla el guardado del vínculo en KV", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "loc_orphan1", name: "X", city: "Y" }), { status: 200 }))
+    );
+    const putSpy = vi.spyOn(env.RESELLER_KV, "put").mockRejectedValue(new Error("KV no disponible"));
+
+    const response = await handleCreateSubaccount(postRequest(validBody), env);
+
+    expect(response.status).toBe(502);
+    const data = await response.json();
+    expect(data.error.code).toBe("GHL_ERROR");
+    expect(data.error.message).toContain("loc_orphan1");
+
+    putSpy.mockRestore();
   });
 });
