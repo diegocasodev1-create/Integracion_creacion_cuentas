@@ -46,6 +46,7 @@ Full user flow and field lists are in `brief-integracion-cuentas.md` — the UX/
 - **Secrets** — `GHL_TOKEN` (agency-level token), `GHL_COMPANY_ID`, `GHL_SNAPSHOT_ID` are Worker secrets, never hardcoded.
 - **Storage** — Cloudflare KV for the reseller-email ↔ locationId link. No other persistence layer.
 - **Out of scope for now** — per-role customization of the `permissions` object; a single fixed base set is used for every new user until role logic is defined later.
+- **Screen 1 email source (deliberate, not an oversight)** — screen 1 no longer has a free-text email input. GHL injects the logged-in reseller's email into the iframe URL as a query param (`?email=...`) on the Custom Menu Link; `public/app.js` reads it via `new URL(window.location.href).searchParams.get("email")` and pre-fills + read-only-locks the existing `#email-input`. If the param is absent (URL opened outside the GHL menu), the form is hidden entirely and a blocking message ("Accedé desde el menú de GHL") is shown — there is intentionally no fallback text input. **This is a UX/flow mitigation only, not real authentication** — a query param is trivially spoofable by anyone calling the API directly. The actual authorization boundary is unchanged and lives server-side: the whitelist check in `src/handlers/createSubaccount.js`, `listSubaccounts.js`, and `createUser.js` (added in a prior fix wave). Do not treat the presence of `?email=` as proof of identity when touching backend code.
 
 ## Stack
 

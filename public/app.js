@@ -26,6 +26,31 @@ async function checkWhitelist(email) {
   return data.authorized === true;
 }
 
+// GHL injects the logged-in reseller's email into the iframe URL as
+// `?email=...` (Custom Menu Link). Screen 1 has no free-text fallback: this
+// is a UX/flow mitigation against casually typing an arbitrary email, NOT
+// cryptographic authentication — the real defense against a direct API
+// caller is the server-side whitelist check in the handlers (see
+// src/handlers/createSubaccount.js, listSubaccounts.js, createUser.js).
+// If the param is absent (URL opened directly, not via the GHL menu), the
+// form is hidden entirely and a blocking message is shown instead — there
+// is intentionally no way to type an email in that case.
+function initEmailScreen() {
+  const emailParam = new URL(window.location.href).searchParams.get("email");
+  const form = document.getElementById("email-form");
+  const blockedEl = document.getElementById("email-blocked");
+
+  if (emailParam) {
+    const input = document.getElementById("email-input");
+    input.value = emailParam;
+    input.readOnly = true;
+  } else {
+    form.hidden = true;
+    blockedEl.hidden = false;
+  }
+}
+initEmailScreen();
+
 document.getElementById("email-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const email = document.getElementById("email-input").value;

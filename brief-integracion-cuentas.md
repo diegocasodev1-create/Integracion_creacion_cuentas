@@ -8,7 +8,22 @@ el CRM como Custom Menu Link (iframe).
 
 ## Flujo de usuario (ya validado con mockup, no rediscutir el diseño)
 
-1. **Entrada**: el reseller ingresa el correo con el que está registrado.
+1. **Entrada**: el correo del reseller llega automáticamente como query param
+   `?email=...` en la URL del iframe (GHL lo inyecta al abrir el Custom Menu
+   Link con la sesión del reseller logueado). La pantalla 1 pre-completa el
+   input de correo con ese valor y lo deja de solo lectura — no hay entrada
+   de texto libre. Si el parámetro no está presente (por ejemplo, alguien
+   abre la URL directamente en vez de entrar desde el menú de GHL), la
+   pantalla no muestra ningún formulario: se bloquea con un mensaje ("Accedé
+   desde el menú de GHL") y no hay forma de escribir un correo.
+   **Nota de seguridad (decisión consciente, no un olvido)**: esto es una
+   mitigación de flujo/UX contra tipear un correo ajeno "por error" en el uso
+   normal — **no es autenticación criptográfica** ni prueba de identidad; un
+   query param es trivial de falsificar por quien llame directamente a la
+   API. La defensa real contra un llamador directo de la API sigue siendo la
+   verificación server-side contra la whitelist en los handlers
+   (`createSubaccount.js`, `listSubaccounts.js`, `createUser.js`), que no se
+   modifica con este cambio.
 2. **Selección**: dos opciones — "Crear Subcuenta" y "Crear Usuario".
 3. **Crear Subcuenta**: formulario con:
    - Datos del cliente: nombre, apellido, celular, email (obligatorios)
