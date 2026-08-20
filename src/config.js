@@ -1,6 +1,7 @@
 export const TIMEZONE_BY_COUNTRY = {
   PE: "America/Lima",
   US: "America/Chicago",
+  MX: "America/Mexico_City",
 };
 
 export function getTimezoneForCountry(countryCode) {
