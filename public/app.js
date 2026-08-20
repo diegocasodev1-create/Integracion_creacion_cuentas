@@ -1,5 +1,6 @@
 // public/app.js
 import { createAppState, advanceToSelect, goToScreen } from "./state.js";
+import { buildCreateSubaccountPayload } from "./forms.js";
 
 let state = createAppState();
 
@@ -59,6 +60,41 @@ document.getElementById("btn-create-subaccount").addEventListener("click", () =>
 document.getElementById("btn-create-user").addEventListener("click", () => {
   state = goToScreen(state, "create-user");
   render();
+});
+
+document.getElementById("create-subaccount-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.target;
+  const formData = Object.fromEntries(new FormData(form).entries());
+  const payload = buildCreateSubaccountPayload(formData, state.resellerEmail);
+
+  const errorEl = document.getElementById("create-subaccount-error");
+  const successEl = document.getElementById("create-subaccount-success");
+  errorEl.hidden = true;
+  successEl.hidden = true;
+
+  try {
+    const response = await fetch("/api/subaccounts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      errorEl.textContent = data.error.message;
+      errorEl.hidden = false;
+      return;
+    }
+
+    successEl.textContent = `Subcuenta "${data.name}" creada en ${data.city}.`;
+    successEl.hidden = false;
+    form.reset();
+  } catch (error) {
+    // Network error or JSON parse error
+    errorEl.textContent = "No se pudo crear la subcuenta. Intentá de nuevo.";
+    errorEl.hidden = false;
+  }
 });
 
 render();

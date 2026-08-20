@@ -24,7 +24,35 @@
     </section>
 
     <section id="screen-create-subaccount" hidden>
-      <!-- form completo: Task 16 -->
+      <h1>Crear Subcuenta</h1>
+      <form id="create-subaccount-form">
+        <fieldset>
+          <legend>Datos del cliente</legend>
+          <input name="clientFirstName" placeholder="Nombre" required />
+          <input name="clientLastName" placeholder="Apellido" required />
+          <input name="clientPhone" placeholder="Celular" required />
+          <input type="email" name="clientEmail" placeholder="Email" required />
+        </fieldset>
+        <fieldset>
+          <legend>Datos del negocio</legend>
+          <input name="businessName" placeholder="Nombre de la subcuenta" required />
+          <input name="businessAddress" placeholder="Dirección" required />
+          <input name="businessCity" placeholder="Ciudad" required />
+          <input name="businessState" placeholder="Región/Provincia/Estado" required />
+          <select name="businessCountry" required>
+            <option value="">País</option>
+            <option value="PE">Perú</option>
+            <option value="US">Estados Unidos</option>
+          </select>
+          <input name="businessPostalCode" placeholder="Código postal" required />
+          <input name="businessWebsite" placeholder="Sitio web (opcional)" />
+          <label><input type="radio" name="installSnapshot" value="with" checked /> Con snapshot</label>
+          <label><input type="radio" name="installSnapshot" value="without" /> Sin snapshot</label>
+        </fieldset>
+        <button type="submit">Crear subcuenta</button>
+      </form>
+      <p id="create-subaccount-error" class="error" hidden></p>
+      <p id="create-subaccount-success" hidden></p>
     </section>
 
     <section id="screen-create-user" hidden>
