@@ -498,8 +498,15 @@ Expected: FAIL (`src/kv/resellerLinks.js` no existe)
 // src/kv/resellerLinks.js
 import { normalizeEmail } from "../config.js";
 
+// Única fuente de verdad para el prefijo `reseller:{email}:` — buildKey y
+// listResellerSubaccounts lo consumen desde acá para que no puedan
+// desincronizarse si el formato de key cambia en el futuro.
+function buildPrefix(resellerEmail) {
+  return `reseller:${normalizeEmail(resellerEmail)}:`;
+}
+
 function buildKey(resellerEmail, locationId) {
-  return `reseller:${normalizeEmail(resellerEmail)}:${locationId}`;
+  return `${buildPrefix(resellerEmail)}${locationId}`;
 }
 
 export async function saveResellerLink(kv, { resellerEmail, locationId, name, city }) {
@@ -514,7 +521,7 @@ export async function getResellerLink(kv, resellerEmail, locationId) {
 }
 
 export async function listResellerSubaccounts(kv, resellerEmail) {
-  const prefix = `reseller:${normalizeEmail(resellerEmail)}:`;
+  const prefix = buildPrefix(resellerEmail);
   const { keys } = await kv.list({ prefix });
   return keys.map((entry) => ({
     locationId: entry.name.slice(prefix.length),
