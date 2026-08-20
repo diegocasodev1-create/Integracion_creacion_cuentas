@@ -242,8 +242,9 @@ confirmar contra la respuesta real de GHL, ver ese doc).
 - Campos de `business` requeridos en nuestra validación: `name`, `address`,
   `city`, `state`, `country`, `postalCode`. `website` opcional.
 - `timezone` fijo por país en `src/config.js` (`TIMEZONE_BY_COUNTRY`) — solo
-  cubre los países ya confirmados (`PE`→`America/Lima`, `US`→`America/Chicago`);
-  agregar más países ahí a medida que se necesiten.
+  cubre los países ya confirmados (`PE`→`America/Lima`, `US`→`America/Chicago`,
+  `MX`→`America/Mexico_City`); agregar más países ahí a medida que se
+  necesiten.
 - El objeto `permissions` (38 flags, `docs/permissions.md`) se manda
   completo en la primera prueba real; se ajusta a los 4 flags documentados
   si GHL los rechaza/ignora — ver `docs/ghl-create-user.md`.

@@ -79,6 +79,12 @@ async function loadSubaccounts() {
       });
       list.appendChild(card);
     }
+
+    if (data.subaccounts.length === 0) {
+      list.innerHTML =
+        '<p>Todavía no tenés subcuentas, o la que acabás de crear puede tardar hasta un minuto en aparecer. <button id="refresh-subaccounts">Actualizar</button></p>';
+      document.getElementById("refresh-subaccounts").addEventListener("click", () => loadSubaccounts());
+    }
   } catch (error) {
     // Network error, non-2xx response, or JSON parse error
     list.innerHTML = "<p>No se pudieron cargar las subcuentas.</p>";
@@ -99,9 +105,11 @@ document.getElementById("create-subaccount-form").addEventListener("submit", asy
 
   const errorEl = document.getElementById("create-subaccount-error");
   const successEl = document.getElementById("create-subaccount-success");
+  const submitButton = form.querySelector('button[type="submit"]');
   errorEl.hidden = true;
   successEl.hidden = true;
 
+  submitButton.disabled = true;
   try {
     const response = await fetch("/api/subaccounts", {
       method: "POST",
@@ -123,6 +131,8 @@ document.getElementById("create-subaccount-form").addEventListener("submit", asy
     // Network error or JSON parse error
     errorEl.textContent = "No se pudo crear la subcuenta. Intentá de nuevo.";
     errorEl.hidden = false;
+  } finally {
+    submitButton.disabled = false;
   }
 });
 
@@ -140,8 +150,12 @@ document.getElementById("create-user-form").addEventListener("submit", async (ev
   });
 
   const errorEl = document.getElementById("create-user-error");
+  const successEl = document.getElementById("create-user-success");
+  const submitButton = form.querySelector('button[type="submit"]');
   errorEl.hidden = true;
+  successEl.hidden = true;
 
+  submitButton.disabled = true;
   try {
     const response = await fetch("/api/users", {
       method: "POST",
@@ -159,10 +173,14 @@ document.getElementById("create-user-form").addEventListener("submit", async (ev
     form.reset();
     // Only close modal on success
     modal.close();
+    successEl.textContent = "Usuario creado correctamente.";
+    successEl.hidden = false;
   } catch (error) {
     // Network error or JSON parse error
     errorEl.textContent = "No se pudo crear el usuario. Intentá de nuevo.";
     errorEl.hidden = false;
+  } finally {
+    submitButton.disabled = false;
   }
 });
 

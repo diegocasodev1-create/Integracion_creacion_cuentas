@@ -22,7 +22,15 @@ export async function ghlFetch(env, path, { method = "GET", body } = {}) {
   });
 
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
+  let data;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    throw new GhlApiError("GHL devolvió una respuesta no parseable como JSON", {
+      status: response.status,
+      body: text.slice(0, 500),
+    });
+  }
 
   if (!response.ok) {
     throw new GhlApiError(data?.message ?? `GHL respondió ${response.status}`, {

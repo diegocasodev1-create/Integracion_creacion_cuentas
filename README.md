@@ -22,7 +22,14 @@ npx vitest run test/handlers/createUser.test.js   # un archivo puntual
 ## Deploy
 
 ```bash
-npx wrangler kv namespace create RESELLER_KV   # una vez, ver Task 18
+npx wrangler kv namespace create RESELLER_KV   # una vez
+```
+
+Copiar el `id` que imprime el comando anterior y pegarlo en
+`wrangler.jsonc`, en `kv_namespaces[0].id` (reemplazando el valor
+`"local-dev-placeholder"`).
+
+```bash
 npx wrangler secret put GHL_TOKEN
 npx wrangler secret put GHL_COMPANY_ID
 npx wrangler secret put GHL_SNAPSHOT_ID

@@ -41,6 +41,7 @@
           <input name="businessState" placeholder="Región/Provincia/Estado" required />
           <select name="businessCountry" required>
             <option value="">País</option>
+            <option value="MX">México</option>
             <option value="PE">Perú</option>
             <option value="US">Estados Unidos</option>
           </select>
@@ -58,6 +59,7 @@
     <section id="screen-create-user" hidden>
       <h1>Crear Usuario</h1>
       <div id="subaccounts-list"></div>
+      <p id="create-user-success" hidden></p>
 
       <dialog id="create-user-modal">
         <form id="create-user-form" method="dialog">

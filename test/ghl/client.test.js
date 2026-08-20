@@ -62,4 +62,16 @@ describe("ghlFetch", () => {
       /GHL respondió 500/
     );
   });
+
+  it("lanza GhlApiError (no un SyntaxError crudo) cuando GHL responde un body no-JSON", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(new Response("<html>Bad Gateway</html>", { status: 502 }))
+    );
+
+    await expect(ghlFetch(env, "/locations/", { method: "POST", body: {} })).rejects.toMatchObject({
+      name: "GhlApiError",
+      status: 502,
+    });
+  });
 });

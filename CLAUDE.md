@@ -4,7 +4,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Pre-implementation. The repository currently contains only `brief-integracion-cuentas.md` (the spec, in Spanish) — no source code, no `package.json`/`wrangler.toml`, no `docs/` yet. There are no build/lint/test commands to run because nothing has been scaffolded. Once the project is initialized (Cloudflare Worker via Wrangler), update this file with real commands (`wrangler dev`, `wrangler deploy`, test runner, single-test invocation) and the actual module layout.
+Implemented. The Worker is scaffolded and functional:
+
+- **Backend** (`src/`): `router.js` dispatches to 4 handlers in `src/handlers/`
+  (`verifyReseller`, `createSubaccount`, `listSubaccounts`, `createUser`);
+  `src/kv/` holds the whitelist and reseller-link KV modules; `src/ghl/`
+  holds the GHL API client (`client.js`) plus `locations.js`/`users.js`;
+  `src/config.js`, `src/validation.js`, and `src/http.js` hold shared
+  config, validation, and response helpers.
+- **Frontend** (`public/`): a 4-screen vanilla-JS iframe app
+  (`index.html`, `app.js`, `forms.js`, `state.js`, `styles.css`).
+- **Docs**: `docs/design/integracion-cuentas-design.md`, `docs/ghl-*.md`,
+  `docs/permissions.md`.
+
+Commands:
+
+```bash
+npm test                                  # full test suite (vitest)
+npx vitest run <path/to/file.test.js>     # single test file
+npm run dev                               # wrangler dev (local)
+npm run deploy                            # wrangler deploy
+```
 
 ## What this project is
 
