@@ -33,6 +33,20 @@ beforeEach(async () => {
 });
 
 describe("handleCreateUser", () => {
+  it("responde 400 sin llamar a GHL si el body no es JSON válido", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const request = new Request("https://example.com/api/users", {
+      method: "POST",
+      body: "esto no es json{{{",
+    });
+    const response = await handleCreateUser(request, env);
+
+    expect(response.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("crea el usuario en GHL y devuelve 201 cuando la subcuenta pertenece al reseller", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ id: "usr_xyz" }), { status: 201 })));
 
