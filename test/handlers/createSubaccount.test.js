@@ -34,13 +34,17 @@ beforeEach(async () => {
 });
 
 describe("handleCreateSubaccount", () => {
-  it("crea la subcuenta en GHL, guarda el vínculo en KV y devuelve 201", async () => {
+  it("crea la subcuenta en GHL, guarda el vínculo en KV y devuelve 201 usando los valores que devuelve GHL (no los del request)", async () => {
+    // El name/city que responde GHL es deliberadamente distinto al del
+    // request — si el handler usara body.business.* en vez de la respuesta
+    // de GHL, este test lo detecta.
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
-        new Response(JSON.stringify({ id: "loc_abc123", name: "Clínica Dental Sonrisas", city: "Guadalajara" }), {
-          status: 200,
-        })
+        new Response(
+          JSON.stringify({ id: "loc_abc123", name: "Clínica Dental Sonrisas S.A.", city: "Zapopan" }),
+          { status: 200 }
+        )
       )
     );
 
@@ -49,12 +53,27 @@ describe("handleCreateSubaccount", () => {
     expect(response.status).toBe(201);
     expect(await response.json()).toEqual({
       locationId: "loc_abc123",
-      name: "Clínica Dental Sonrisas",
-      city: "Guadalajara",
+      name: "Clínica Dental Sonrisas S.A.",
+      city: "Zapopan",
     });
 
     const link = await env.RESELLER_KV.get("reseller:juan.perez@agencia.com:loc_abc123", "json");
-    expect(link.name).toBe("Clínica Dental Sonrisas");
+    expect(link.name).toBe("Clínica Dental Sonrisas S.A.");
+    expect(link.city).toBe("Zapopan");
+  });
+
+  it("responde 400 sin llamar a GHL si el body no es JSON válido", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const request = new Request("https://example.com/api/subaccounts", {
+      method: "POST",
+      body: "esto no es json{{{",
+    });
+    const response = await handleCreateSubaccount(request, env);
+
+    expect(response.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("responde 400 sin llamar a GHL si el payload es inválido", async () => {
@@ -67,12 +86,17 @@ describe("handleCreateSubaccount", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("responde 400 si el país no tiene timezone configurado", async () => {
+  it("responde 400 sin llamar a GHL si el país no tiene timezone configurado", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
     const response = await handleCreateSubaccount(
       postRequest({ ...validBody, business: { ...validBody.business, country: "ZZ" } }),
       env
     );
+
     expect(response.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("responde 502 con el mensaje de GHL si GHL rechaza la creación", async () => {
