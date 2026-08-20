@@ -244,6 +244,6 @@ confirmar contra la respuesta real de GHL, ver ese doc).
 - `timezone` fijo por país en `src/config.js` (`TIMEZONE_BY_COUNTRY`) — solo
   cubre los países ya confirmados (`PE`→`America/Lima`, `US`→`America/Chicago`);
   agregar más países ahí a medida que se necesiten.
-- El objeto `permissions` (37 flags, `docs/permissions.md`) se manda
+- El objeto `permissions` (38 flags, `docs/permissions.md`) se manda
   completo en la primera prueba real; se ajusta a los 4 flags documentados
   si GHL los rechaza/ignora — ver `docs/ghl-create-user.md`.

@@ -17,7 +17,7 @@
 - Secrets `GHL_TOKEN`, `GHL_COMPANY_ID`, `GHL_SNAPSHOT_ID` — nunca hardcodeados, siempre `env.*` poblado vía `wrangler secret put`.
 - Todas las llamadas a GHL usan `Version: v3` (no `2021-07-28`) y `Authorization: Bearer {GHL_TOKEN}`, base URL `https://services.leadconnectorhq.com`.
 - `role` de usuario creado siempre `"admin"`, `type` siempre `"account"` — sin selector.
-- `permissions` en `POST /users/` es el set fijo completo de `docs/permissions.md` (37 flags) — mismo objeto para todo usuario nuevo, sin personalización por rol (fuera de alcance).
+- `permissions` en `POST /users/` es el set fijo completo de `docs/permissions.md` (38 flags) — mismo objeto para todo usuario nuevo, sin personalización por rol (fuera de alcance).
 - Password de usuario nuevo: mínimo 12 caracteres, 1 mayúscula, 1 minúscula, 1 número, 1 carácter especial — validado client-side y server-side.
 - Ningún request pasa de la pantalla 1 (entrada de email) a la pantalla 2 si el email no está en la whitelist de KV.
 - Errores de API siempre responden `{ "error": { "code": "...", "message": "..." } }`.
@@ -104,18 +104,30 @@ mkdir -p public
 - [ ] **Step 5: Crear `vitest.config.js`**
 
 ```js
-import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
+import { cloudflareTest } from "@cloudflare/vitest-pool-workers";
+import { defineConfig } from "vitest/config";
 
-export default defineWorkersConfig({
-  test: {
-    poolOptions: {
-      workers: {
-        wrangler: { configPath: "./wrangler.jsonc" },
-      },
-    },
-  },
+export default defineConfig({
+  plugins: [
+    cloudflareTest({
+      wrangler: { configPath: "./wrangler.jsonc" },
+    }),
+  ],
 });
 ```
+
+**Nota (corrección post-plan):** el snippet original de este plan usaba
+`defineWorkersConfig` de `@cloudflare/vitest-pool-workers/config` — esa API
+no existe en `@cloudflare/vitest-pool-workers@0.22.0` (el paquete que
+instala `npm install -D @cloudflare/vitest-pool-workers@latest`, pareado con
+Vitest 4). La versión actual usa un plugin de Vite (`cloudflareTest`)
+exportado desde la raíz del paquete, registrado en `plugins: []` de
+`defineConfig` de `vitest/config` — confirmado contra
+`developers.cloudflare.com/workers/testing/vitest-integration/` y contra el
+`.d.mts` del paquete instalado (`cloudflareTest(options): Vite.Plugin`,
+`options.wrangler.configPath: string`). El uso de `cloudflare:test` (`env`,
+`SELF`) dentro de los archivos de test, referenciado en todas las tasks
+siguientes, no cambia.
 
 - [ ] **Step 6: Crear `.gitignore` y `.dev.vars.example`**
 
@@ -191,7 +203,7 @@ git commit -m "chore: scaffold Worker project (JS, wrangler, vitest-pool-workers
 - Test: `test/config.test.js`
 
 **Interfaces:**
-- Produces: `getTimezoneForCountry(countryCode) -> string` (lanza `Error` si no hay mapeo), `normalizeEmail(email) -> string`, `FIXED_PERMISSIONS` (objeto de 37 flags, exportado tal cual, usado por Task 9).
+- Produces: `getTimezoneForCountry(countryCode) -> string` (lanza `Error` si no hay mapeo), `normalizeEmail(email) -> string`, `FIXED_PERMISSIONS` (objeto de 38 flags, exportado tal cual, usado por Task 9).
 
 - [ ] **Step 1: Escribir los tests (fallan primero)**
 
@@ -228,8 +240,8 @@ describe("FIXED_PERMISSIONS", () => {
     expect(FIXED_PERMISSIONS.workflowsEnabled).toBe(true);
   });
 
-  it("tiene 37 flags en total", () => {
-    expect(Object.keys(FIXED_PERMISSIONS)).toHaveLength(37);
+  it("tiene 38 flags en total", () => {
+    expect(Object.keys(FIXED_PERMISSIONS)).toHaveLength(38);
   });
 });
 ```
@@ -2502,7 +2514,7 @@ Con el worker corriendo local:
 2. Abrir `http://localhost:8787`, entrar ese email → debe avanzar a la pantalla de selección.
 3. "Crear Subcuenta" → completar el form → confirmar que devuelve 201 y que la tarjeta aparece luego en "Crear Usuario".
 4. "Crear Usuario" → elegir la tarjeta → completar el modal → confirmar 201.
-5. **Punto pendiente de `docs/ghl-create-user.md`:** revisar en el dashboard de GHL (o en la respuesta cruda) si los 37 flags de `permissions` se guardaron. Si GHL los ignoró/rechazó, reducir `FIXED_PERMISSIONS` en `src/config.js` a los 4 flags documentados en v3 y volver a correr `test/config.test.js` + `test/ghl/users.test.js` (ajustar sus expectativas al nuevo objeto).
+5. **Punto pendiente de `docs/ghl-create-user.md`:** revisar en el dashboard de GHL (o en la respuesta cruda) si los 38 flags de `permissions` se guardaron. Si GHL los ignoró/rechazó, reducir `FIXED_PERMISSIONS` en `src/config.js` a los 4 flags documentados en v3 y volver a correr `test/config.test.js` + `test/ghl/users.test.js` (ajustar sus expectativas al nuevo objeto).
 
 - [ ] **Step 6: Commit**
 

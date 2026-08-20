@@ -53,7 +53,7 @@ registro por subcuenta con índice inverso por email).
 - **Password de crear usuario**: GHL exige mínimo 12 caracteres, 1 mayúscula,
   1 minúscula, 1 número y 1 carácter especial. El campo del modal debe validar
   esto (client-side y también manejar el error si GHL lo rechaza).
-- **Posible discrepancia en `permissions`**: el objeto de 37 flags en
+- **Posible discrepancia en `permissions`**: el objeto de 38 flags en
   `docs/permissions.md` puede ser de una versión anterior de la API — la doc
   v3 actual solo documenta 4 flags en su ejemplo. Enviarlo completo en la
   primera prueba real contra la cuenta y verificar en la respuesta de GHL si

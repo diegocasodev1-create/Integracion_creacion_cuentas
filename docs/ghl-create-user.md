@@ -31,10 +31,10 @@ No incluir `profilePhoto`, `platformLanguage` ni `twilioPhone`.
 
 ### Sobre `permissions`
 
-`docs/permissions.md` trae 37 flags de una fuente que puede no corresponder a la
+`docs/permissions.md` trae 38 flags de una fuente que puede no corresponder a la
 versión `v3` actual (la doc pública `v3` solo documenta 4 flags de ejemplo:
 `campaignsEnabled`, `campaignsReadOnly`, `contactsEnabled`, `workflowsEnabled`).
-Decisión: mandar el objeto completo de 37 flags en la primera llamada real de
+Decisión: mandar el objeto completo de 38 flags en la primera llamada real de
 prueba contra la cuenta y revisar la respuesta —
 
 - si GHL los acepta/guarda → se deja el set completo.
