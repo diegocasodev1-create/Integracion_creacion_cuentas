@@ -1,0 +1,5 @@
+/* public/styles.css */
+body { font-family: system-ui, sans-serif; max-width: 480px; margin: 2rem auto; padding: 0 1rem; }
+section[hidden] { display: none; }
+.error { color: #b00020; }
+button { cursor: pointer; }

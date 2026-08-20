@@ -1,5 +1,36 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><title>Integracion Cuentas</title></head>
-<body><p>Placeholder — se reemplaza en Task 15.</p></body>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Integracion Cuentas</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main>
+    <section id="screen-email">
+      <h1>Ingresá tu correo de reseller</h1>
+      <form id="email-form">
+        <input type="email" id="email-input" required placeholder="tu@agencia.com" />
+        <button type="submit">Continuar</button>
+      </form>
+      <p id="email-error" class="error" hidden></p>
+    </section>
+
+    <section id="screen-select" hidden>
+      <h1>¿Qué querés hacer?</h1>
+      <button id="btn-create-subaccount">Crear Subcuenta</button>
+      <button id="btn-create-user">Crear Usuario</button>
+    </section>
+
+    <section id="screen-create-subaccount" hidden>
+      <!-- form completo: Task 16 -->
+    </section>
+
+    <section id="screen-create-user" hidden>
+      <!-- listado + modal: Task 17 -->
+    </section>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
 </html>
