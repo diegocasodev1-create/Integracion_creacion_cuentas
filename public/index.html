@@ -56,7 +56,29 @@
     </section>
 
     <section id="screen-create-user" hidden>
-      <!-- listado + modal: Task 17 -->
+      <h1>Crear Usuario</h1>
+      <div id="subaccounts-list"></div>
+
+      <dialog id="create-user-modal">
+        <form id="create-user-form" method="dialog">
+          <input type="hidden" name="locationId" />
+          <input name="firstName" placeholder="Nombre" required />
+          <input name="lastName" placeholder="Apellido" required />
+          <input type="email" name="email" placeholder="Correo" required />
+          <input name="phone" placeholder="Teléfono" required />
+          <input
+            type="password"
+            name="password"
+            placeholder="Contraseña (mín. 12, mayús., minús., número, carácter especial)"
+            minlength="12"
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$"
+            required
+          />
+          <button type="submit">Crear usuario</button>
+          <button type="button" id="close-modal">Cancelar</button>
+        </form>
+        <p id="create-user-error" class="error" hidden></p>
+      </dialog>
     </section>
   </main>
   <script type="module" src="/app.js"></script>

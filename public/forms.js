@@ -19,3 +19,15 @@ export function buildCreateSubaccountPayload(formData, resellerEmail) {
     installSnapshot: formData.installSnapshot === "with",
   };
 }
+
+export function buildCreateUserPayload(formData, { resellerEmail, locationId }) {
+  return {
+    resellerEmail,
+    locationId,
+    firstName: formData.firstName,
+    lastName: formData.lastName,
+    email: formData.email,
+    phone: formData.phone,
+    password: formData.password,
+  };
+}

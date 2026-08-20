@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildCreateSubaccountPayload } from "../../public/forms.js";
+import { buildCreateSubaccountPayload, buildCreateUserPayload } from "../../public/forms.js";
 
 describe("buildCreateSubaccountPayload", () => {
   it("arma el payload con la forma que espera POST /api/subaccounts", () => {
@@ -44,5 +44,32 @@ describe("buildCreateSubaccountPayload", () => {
   it("installSnapshot es false cuando el radio es \"without\"", () => {
     const payload = buildCreateSubaccountPayload({ installSnapshot: "without" }, "a@b.com");
     expect(payload.installSnapshot).toBe(false);
+  });
+});
+
+describe("buildCreateUserPayload", () => {
+  it("arma el payload con la forma que espera POST /api/users", () => {
+    const formData = {
+      firstName: "Carlos",
+      lastName: "Ramírez",
+      email: "carlos@clinica.com",
+      phone: "+52 33 9876 5432",
+      password: "Str0ng!Passw0rd",
+    };
+
+    const payload = buildCreateUserPayload(formData, {
+      resellerEmail: "juan.perez@agencia.com",
+      locationId: "loc_abc123",
+    });
+
+    expect(payload).toEqual({
+      resellerEmail: "juan.perez@agencia.com",
+      locationId: "loc_abc123",
+      firstName: "Carlos",
+      lastName: "Ramírez",
+      email: "carlos@clinica.com",
+      phone: "+52 33 9876 5432",
+      password: "Str0ng!Passw0rd",
+    });
   });
 });
