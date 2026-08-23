@@ -8,7 +8,7 @@
     "run_worker_first": ["/api/*"]
   },
   "kv_namespaces": [
-    { "binding": "RESELLER_KV", "id": "local-dev-placeholder" }
+    { "binding": "RESELLER_KV", "id": "c5e1aec370654e879f7b4e4c79dd5aef" }
   ],
   "observability": {
     "enabled": true
