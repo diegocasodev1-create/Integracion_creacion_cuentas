@@ -5,7 +5,7 @@ Estado real del proyecto a la fecha de abajo. No reemplaza a `docs/superpowers/p
 este archivo registra en qué quedó el trabajo y qué falta confirmar, para
 retomar sin perder contexto entre sesiones.
 
-**Última actualización:** 2026-08-23
+**Última actualización:** 2026-08-23 (sesión 2)
 
 ## 1. Deploy
 
@@ -16,14 +16,37 @@ responde `404` con la forma de error esperada
 (`{"error":{"code":"NOT_FOUND",...}}`), confirmando que es el Worker real
 y no un placeholder.
 
-KV real y los 3 secrets (`GHL_TOKEN`, `GHL_COMPANY_ID`, `GHL_SNAPSHOT_ID`)
-están configurados según lo reportado — **no pude verificarlo yo mismo
-desde esta sesión**: el `CLOUDFLARE_API_TOKEN` con el que quedó
-autenticado `wrangler` acá apunta a otra cuenta de Cloudflare
-(`Mimentemillonariaya@gmail.com's Account`), donde `wrangler secret list`
-da `Worker "integracion-cuentas" not found`. Si en la próxima sesión hace
-falta correr comandos de `wrangler` contra el Worker real (secrets,
-deployments, KV), primero hay que resolver esa discrepancia de cuenta/token.
+**La discrepancia de cuenta/token de la sesión anterior está resuelta.**
+El usuario borró `CLOUDFLARE_API_TOKEN` a nivel de sistema; `wrangler
+whoami` ahora autentica correctamente contra `diegocaso@gohighascend.com`
+(`Diegocaso@gohighascend.com's Account`, id `b039f7aff98607384d4d2543c390dacc`).
+
+Pero eso solo no alcanzó: wrangler además tenía cacheada la cuenta vieja
+en un archivo **local al proyecto**,
+`node_modules/.cache/wrangler/wrangler-account.json`, con
+`"Mimentemillonariaya@gmail.com's Account"` (id
+`c7e0611c55f1791c1bde273a55feb446`) — de ahí venían los
+`Authentication error [code: 10000]` en `secret list` / `deployments
+list` aunque `whoami` ya diera la cuenta correcta. Se borró ese archivo
+(se regenera solo, con la cuenta correcta, en el siguiente comando).
+**Si vuelve a aparecer `code: 10000` en este repo con `whoami` OK, borrar
+ese archivo de nuevo antes de asumir otra cosa.**
+
+Con la cuenta correcta confirmada, se verificó en esta sesión:
+- `wrangler secret list` → los 3 secrets existen: `GHL_TOKEN`,
+  `GHL_COMPANY_ID`, `GHL_SNAPSHOT_ID` (solo nombres, no valores).
+- `wrangler kv namespace list` → `RESELLER_KV` (id
+  `c5e1aec370654e879f7b4e4c79dd5aef`) coincide con el binding real en
+  `wrangler.jsonc`.
+- `wrangler kv key list --namespace-id ... --remote` → existe
+  `whitelist:diegocaso@gohighascend.com` (confirmado por el usuario que
+  la dio de alta a mano por el dashboard). **Gotcha:** `wrangler kv key
+  list` sin flag por defecto pega contra `--local` (Miniflare vacío),
+  no contra `--remote`; correrlo sin el flag da `[]` y parece "namespace
+  vacío" cuando no lo es — pasó en esta misma sesión, hay que acordarse
+  de pasar `--remote` siempre para consultar el KV real. No hay keys
+  `reseller:*` todavía (consistente con que ninguna subcuenta se creó
+  aún de punta a punta a través del endpoint del Worker — ver §4).
 
 El proyecto vive completo en la raíz del repo (`main`) — el worktree
 separado (`worktree-integracion-cuentas-impl`) se mergeó y se eliminó en
