@@ -18,9 +18,19 @@ export function normalizeEmail(email) {
 
 // Set base fijo de docs/permissions.md — mismo objeto para todo usuario
 // nuevo creado desde el modal "Crear Usuario" (rol fijo "admin").
-// Validar en la primera llamada real contra la cuenta (ver docs/ghl-create-user.md):
-// si GHL ignora/rechaza los flags no documentados en v3, reducir a los 4
-// confirmados (campaignsEnabled, campaignsReadOnly, contactsEnabled, workflowsEnabled).
+// Validado contra la cuenta real (2026-08-26, ver progress.md): GHL acepta
+// los 38 flags tal cual, sin rechazar la request ni recortar ninguno. Dos
+// matices confirmados en la respuesta real:
+// - GHL sobrescribe workflowsEnabled a `false` sin importar el valor
+//   enviado (se mandó `true`, volvió `false`); el resto de los 38 flags
+//   vuelven con el mismo valor enviado.
+// - GHL agrega ~10 flags adicionales por su cuenta que no están en este
+//   set (opportunitiesBulkActionsEnabled, certificatesEnabled,
+//   mediaStorageEnabled, reportingEnabled, adPublishingEnabled,
+//   adPublishingReadOnly, wordpressEnabled, customMenuLinkReadOnly,
+//   customMenuLinkWrite, gokollabEnabled), todos en `true` por default.
+// No hace falta reducir el set a los 4 documentados en v3 — GHL no rechaza
+// ni ignora los otros 34.
 export const FIXED_PERMISSIONS = {
   campaignsEnabled: true,
   campaignsReadOnly: false,

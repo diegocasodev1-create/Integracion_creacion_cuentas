@@ -40,8 +40,19 @@ prueba contra la cuenta y revisar la respuesta —
 - si GHL los acepta/guarda → se deja el set completo.
 - si GHL los ignora o rechaza → se reduce a los 4 documentados.
 
-No bloquea el plan de implementación; se resuelve en la tarea de verificación
-manual end-to-end (ver plan).
+**Resuelto (2026-08-26, ver progress.md):** GHL acepta los 38 flags sin
+rechazar la request. Dos matices reales, no documentados en la referencia
+pública:
+- `workflowsEnabled` vuelve siempre en `false` en la respuesta,
+  independientemente del valor enviado (se probó con `true`).
+- GHL agrega automáticamente ~10 flags más que no mandamos
+  (`opportunitiesBulkActionsEnabled`, `certificatesEnabled`,
+  `mediaStorageEnabled`, `reportingEnabled`, `adPublishingEnabled`,
+  `adPublishingReadOnly`, `wordpressEnabled`, `customMenuLinkReadOnly`,
+  `customMenuLinkWrite`, `gokollabEnabled`), todos en `true`.
+
+Se mantiene el set completo de 38 en `FIXED_PERMISSIONS` — no hace falta
+reducirlo a los 4 documentados en v3.
 
 ## Response 201
 
