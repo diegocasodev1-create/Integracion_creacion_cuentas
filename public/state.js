@@ -11,3 +11,10 @@ export function advanceToSelect(state, email) {
 export function goToScreen(state, screen) {
   return { ...state, screen };
 }
+
+export function resolveEmailSubmit(state, email, authorized) {
+  if (!authorized) {
+    return { state, error: "Este correo no está autorizado. Contactá al equipo técnico." };
+  }
+  return { state: advanceToSelect(state, email), error: null };
+}

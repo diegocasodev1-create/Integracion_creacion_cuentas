@@ -8,22 +8,25 @@ el CRM como Custom Menu Link (iframe).
 
 ## Flujo de usuario (ya validado con mockup, no rediscutir el diseño)
 
-1. **Entrada**: el correo del reseller llega automáticamente como query param
-   `?email=...` en la URL del iframe (GHL lo inyecta al abrir el Custom Menu
-   Link con la sesión del reseller logueado). La pantalla 1 pre-completa el
-   input de correo con ese valor y lo deja de solo lectura — no hay entrada
-   de texto libre. Si el parámetro no está presente (por ejemplo, alguien
-   abre la URL directamente en vez de entrar desde el menú de GHL), la
-   pantalla no muestra ningún formulario: se bloquea con un mensaje ("Accedé
-   desde el menú de GHL") y no hay forma de escribir un correo.
-   **Nota de seguridad (decisión consciente, no un olvido)**: esto es una
-   mitigación de flujo/UX contra tipear un correo ajeno "por error" en el uso
-   normal — **no es autenticación criptográfica** ni prueba de identidad; un
-   query param es trivial de falsificar por quien llame directamente a la
-   API. La defensa real contra un llamador directo de la API sigue siendo la
-   verificación server-side contra la whitelist en los handlers
-   (`createSubaccount.js`, `listSubaccounts.js`, `createUser.js`), que no se
-   modifica con este cambio.
+1. **Entrada**: el reseller ingresa el correo con el que está registrado en un
+   input de texto libre y confirma con "Continuar". La pantalla llama a
+   `GET /api/whitelist?email=...` para validarlo contra la whitelist; si es
+   válido pasa al menú, si no muestra un error inline ("Este correo no está
+   autorizado. Contactá al equipo técnico.") sin bloquear la página — el
+   reseller puede corregir y reintentar.
+   **Historial (para no repetir el error):** hubo una versión intermedia
+   (commit `9c9b649`, 2026-08-20) que sacaba el input manual y pre-completaba
+   el correo automáticamente desde un query param `?email=...` que GHL
+   inyectaría al abrir el Custom Menu Link — con bloqueo total de la pantalla
+   si el parámetro no estaba presente. **Se probó contra el Custom Menu Link
+   real embebido en GHL el 2026-08-26 y falló**: la pantalla mostró el
+   bloqueo ("Accedé desde el menú de GHL...") en vez del menú, es decir el
+   query param no llegó al iframe en el entorno real. No se investigó la
+   causa raíz (podría ser la configuración del Target URL del Custom Menu
+   Link en GHL, o un bug de lectura en `app.js`) — se decidió revertir al
+   input manual en vez de seguir depurando el mecanismo automático. Ver
+   `CLAUDE.md` ("Screen 1 email source") para el detalle técnico del
+   rollback.
 2. **Selección**: dos opciones — "Crear Subcuenta" y "Crear Usuario".
 3. **Crear Subcuenta**: formulario con:
    - Datos del cliente: nombre, apellido, celular, email (obligatorios)

@@ -1,5 +1,5 @@
 // public/app.js
-import { createAppState, advanceToSelect, goToScreen } from "./state.js";
+import { createAppState, goToScreen, resolveEmailSubmit } from "./state.js";
 import { buildCreateSubaccountPayload, buildCreateUserPayload } from "./forms.js";
 
 let state = createAppState();
@@ -26,31 +26,12 @@ async function checkWhitelist(email) {
   return data.authorized === true;
 }
 
-// GHL injects the logged-in reseller's email into the iframe URL as
-// `?email=...` (Custom Menu Link). Screen 1 has no free-text fallback: this
-// is a UX/flow mitigation against casually typing an arbitrary email, NOT
-// cryptographic authentication — the real defense against a direct API
-// caller is the server-side whitelist check in the handlers (see
-// src/handlers/createSubaccount.js, listSubaccounts.js, createUser.js).
-// If the param is absent (URL opened directly, not via the GHL menu), the
-// form is hidden entirely and a blocking message is shown instead — there
-// is intentionally no way to type an email in that case.
-function initEmailScreen() {
-  const emailParam = new URL(window.location.href).searchParams.get("email");
-  const form = document.getElementById("email-form");
-  const blockedEl = document.getElementById("email-blocked");
-
-  if (emailParam) {
-    const input = document.getElementById("email-input");
-    input.value = emailParam;
-    input.readOnly = true;
-  } else {
-    form.hidden = true;
-    blockedEl.hidden = false;
-  }
-}
-initEmailScreen();
-
+// Screen 1 has a free-text email input: the reseller types the email they're
+// registered with, we validate it against /api/whitelist, and either advance
+// to the menu or show an inline error they can correct without losing the
+// page. (A prior version tried pre-filling this from a GHL Custom Menu Link
+// query param instead — reverted after it failed against the real embedded
+// link; see CLAUDE.md "Screen 1 email source" for details.)
 document.getElementById("email-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const email = document.getElementById("email-input").value;
@@ -67,13 +48,14 @@ document.getElementById("email-form").addEventListener("submit", async (event) =
     return;
   }
 
-  if (!authorized) {
-    errorEl.textContent = "Este correo no está autorizado. Contactá al equipo técnico.";
+  const { state: nextState, error } = resolveEmailSubmit(state, email, authorized);
+  if (error) {
+    errorEl.textContent = error;
     errorEl.hidden = false;
     return;
   }
 
-  state = advanceToSelect(state, email);
+  state = nextState;
   render();
 });
 
